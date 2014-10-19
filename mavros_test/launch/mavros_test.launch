@@ -1,0 +1,4 @@
+<!-- nodes and parameters for mavros_test -->
+<launch>
+  <node name="hello_mavros" pkg="mavros_test" type="hello_mavros.py" output="screen"/>
+</launch>
