@@ -7,6 +7,15 @@ from geometry_msgs.msg import TwistStamped
 from mavros.msg import *
 from mavros.srv import *
 
+# class Quadcopter(object):
+#     def __init__(self):
+#         super(Quadcopter, self).__init__()
+#         self.latest_longitude = -1.0
+#         self.latest_latitude = -1.0
+#         topic = '/mavros/fix'
+#         rospy.Subscriber(topic, NavSatFix, callback)
+#         rospy.loginfo('Just subscribed to %s', topic)
+
 # TEST Remove this function if it works
 def callback(data):
     rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
@@ -25,7 +34,7 @@ def launch(latitude, longitude, min_pitch = 0, yaw = 0, altitude = 4):
     try:
         command = rospy.ServiceProxy(topic, CommandTOL)
         res = command(min_pitch, yaw, latitude, longitude, altitude)
-        print res
+        print 'res: ',res
         if str(res) == 'success: True':
             print 'successfully launching'
             return True
@@ -39,6 +48,5 @@ def launch(latitude, longitude, min_pitch = 0, yaw = 0, altitude = 4):
 
 if __name__ == '__main__':
     rospy.init_node('listener', anonymous=True)
-    launch(latitude = 0.0, longitude = 0.0)
+    # launch(latitude = 0.0, longitude = 0.0)
     listener()
-    
