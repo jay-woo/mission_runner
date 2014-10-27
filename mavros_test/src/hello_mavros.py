@@ -48,6 +48,8 @@ def land(latitude, longitude, min_pitch = 0, yaw = 0, altitude = 0):
         return False
         rospy.loginfo('Ran land')
 
+
+
 # TEST Remove this function if it works
 def callback(msg):
     rospy.loginfo(rospy.get_caller_id() + 'latitude: %f\tlongitude: %f',
