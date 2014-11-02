@@ -6,19 +6,18 @@ from sensor_msgs.msg import *
 from geometry_msgs.msg import TwistStamped
 from mavros.msg import *
 from mavros.srv import *
-from service import *
 
 
 class Quadcopter(object):
     def __init__(self):
         super(Quadcopter, self).__init__()
-        self.SUBSCRIBE_TIMEOUT = 3.0
+        self.SUBSCRIBE_TIMEOUT = 2.0
 
         # Subscribe to necessary topics
         self.latest_longitude = -1.0
         self.latest_latitude = -1.0
         topic = '/mavros/fix'
-        rospy.Subscriber(topic, NavSatFix, gps_callback)
+        rospy.Subscriber(topic, NavSatFix, self.gps_callback)
         rospy.loginfo('Just subscribed to %s', topic)
         subscribe_timer = 0.0
         while (self.latest_longitude == -1 or self.latest_latitude == -1) and\
@@ -31,20 +30,27 @@ class Quadcopter(object):
             # TODO: decide what the right thing to do if subscription fails
             pass
 
+        # Create necessary publishers
+        self.rc_override_pub = rospy.Publisher('/mavros/rc/override',
+                                               OverrideRCIn, queue_size=10)
+
         # Create necessary service proxies
-        self.rc_override = subscribe_service('/mavros/rc/override', OverrideRCIn)
         self.launcher = subscribe_service('/mavros/cmd/takeoff', CommandTOL)
-        self.goto_wp = subscribe_service('/mavros/WaypointPush', Waypoint[])
+        # TODO: WaypointList isn't working
+        # self.goto_wp = subscribe_service('/mavros/mission/push', WaypointList)
         self.lander = subscribe_service('/mavros/cmd/land', CommandTOL)
 
 
     def send_rc(self, channels):
+        header = Header(seq=1, stamp=rospy.Time.now(), frame_id='')
+        rssi = 0
+        rospy.loginfo('Trying to send RC signal!')
+
         try:
-            res = self.rc_override(channels)
-            return evaluate_service(res)
+            self.rc_override_pub.publish(channels)
         except rospy.ServiceException, e:
-            rospy.logwarn('Error encountered: %s', str(e))
             return False
+            rospy.logwarn('Error encountered: %s', str(e))
         rospy.loginfo('Ran send_rc')
 
     def launch(self, latitude, longitude, min_pitch = 0, yaw = 0, altitude = 4):
@@ -96,7 +102,7 @@ class Quadcopter(object):
 
 
 def did_subscribe_succeed(timer, timeout, topic):
-    if timer >= timout:
+    if timer >= timeout:
         rospy.logwarn("Quadcopter FAILED to subscribe to topic %s", topic)
         return False
     else:
@@ -118,8 +124,9 @@ def annotated_timer(wait_time = 10.0):
     return
 
 def subscribe_service(name, datatype):
+    rospy.loginfo('Waiting for service %s...', name)
     rospy.wait_for_service(name)
-    rospy.loginfo('Succesfully found service %s', name)
+    rospy.loginfo('\tSuccesfully found service %s', name)
     return rospy.ServiceProxy(name, datatype)
 
 def evaluate_service(result, success):
@@ -139,8 +146,8 @@ if __name__ == '__main__':
     quad = Quadcopter()
 
     ###### RC TEST ######
-    # channels = [1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500]
-    # quad.send_rc(channels)
+    channels = [1480, 1500, 1500, 1500, 1430, 1300, 990, 1500]
+    quad.send_rc(channels)
     # Tests to run
         # The Pixhawk only has six RC channels, but MAVLink documentation says
         #   MAVLink uses eight. Wehich should we use?
