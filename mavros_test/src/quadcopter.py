@@ -25,18 +25,27 @@ class Quadcopter(object):
               subscribe_timer < self.SUBSCRIBE_TIMEOUT:
             rospy.sleep(0.1)
             subscribe_timer += 0.1
-        if not did_subscribe_succeed(subscribe_timer, self.SUBSCRIBE_TIMEOUT,
+        if not did_subscribe_succeed(subscribe_timer,
+                                     self.SUBSCRIBE_TIMEOUT,
                                      topic):
             # TODO: decide what the right thing to do if subscription fails
             pass
 
         # Create necessary service proxies
-        name = '/mavros/cmd/takeoff'
-        self.launcher = Service(name, self.SUBSCRIBE_TIMEOUT, 'success: True',
-                         CommandTOL)
-        name = '/mavros/cmd/land'
-        self.lander = Service(name, self.SUBSCRIBE_TIMEOUT, 'success: True',
-                 CommandTOL)
+        self.rc_override = subscribe_service('/mavros/rc/override', OverrideRCIn)
+        self.launcher = subscribe_service('/mavros/cmd/takeoff', CommandTOL)
+        self.goto_wp = subscribe_service('/mavros/WaypointPush', Waypoint[])
+        self.lander = subscribe_service('/mavros/cmd/land', CommandTOL)
+
+
+    def send_rc(self, channels):
+        try:
+            res = self.rc_override(channels)
+            return evaluate_service(res)
+        except rospy.ServiceException, e:
+            rospy.logwarn('Error encountered: %s', str(e))
+            return False
+        rospy.loginfo('Ran send_rc')
 
     def launch(self, latitude, longitude, min_pitch = 0, yaw = 0, altitude = 4):
         # Uncomment this after testing with hand_entered points and confirming
@@ -44,12 +53,27 @@ class Quadcopter(object):
         # current_longitude = self.latest_longitude
         # current_latitude = self.latest_latitude
         try:
-            res = self.cmd_takeoff(min_pitch, yaw, latitude, longitude, altitude)
+            res = self.launcher(min_pitch, yaw, latitude, longitude, altitude)
             return evaluate_service(res)
         except rospy.ServiceException, e:
             rospy.logwarn('Error encountered: %s', str(e))
             return False
         rospy.loginfo('Ran launch')
+
+    def goto(self, latitude, longitude, is_current = False, autocontinue = True,
+             frame = Waypoint.FRAME_GLOBAL, cmd = Waypoint.NAV_WAYPOINT):
+        wp = Waypoint(frame = frame, command = cmd,
+                      is_current = is_current, autocontinue = autocontinue,
+                      x_lat = 71.44, y_long = -41.22, z_alt = 4)
+        # TODO: Figure out  - should we be pushing individual waypoints in a
+        #   list? Should we be doing individual waypoints?
+        try:
+            res = self.goto_wp([wp])
+            return evaluate_service(res)
+        except rospy.ServiceException, e:
+            rospy.logwarn('Error encountered: %s', str(e))
+            return False
+        rospy.loginfo('Ran goto')
 
     def land(self, latitude, longitude, min_pitch = 0, yaw = 0, altitude = 4):
         # Uncomment this after testing with hand_entered points and confirming
@@ -57,7 +81,7 @@ class Quadcopter(object):
         # current_longitude = self.latest_longitude
         # current_latitude = self.latest_latitude
         try:
-            res = self.cmd_land(min_pitch, yaw, latitude, longitude, altitude)
+            res = self.lander(min_pitch, yaw, latitude, longitude, altitude)
             return evaluate_service(res)
         except rospy.ServiceException, e:
             rospy.logwarn('Error encountered: %s', str(e))
@@ -69,6 +93,7 @@ class Quadcopter(object):
                       msg.latitude, msg.longitude)
         self.latest_longitude = msg.longitude
         self.latest_latitude  = msg.latitude
+
 
 def did_subscribe_succeed(timer, timeout, topic):
     if timer >= timout:
@@ -92,15 +117,67 @@ def annotated_timer(wait_time = 10.0):
     rospy.sleep(0.1)
     return
 
+def subscribe_service(name, datatype):
+    rospy.wait_for_service(name)
+    rospy.loginfo('Succesfully found service %s', name)
+    return rospy.ServiceProxy(name, datatype)
+
+def evaluate_service(result, success):
+        print 'res: ', result
+        if str(result) == success:
+            rospy.loginfo('Successfully ran service %s', self.service.name)
+            return True
+        else:
+            rospy.loginfo('Error with service %s', self.service.name)
+            return False
+
+
 if __name__ == '__main__':
     rospy.init_node('Quadcopter')
     rospy.sleep(1.0)
 
     quad = Quadcopter()
-    lat = 42.292829
-    lon = -71.263084
-    quad.launch(lat, lon)
-    annotated_timer(30)
-    quad.land(lat, lon)
+
+    ###### RC TEST ######
+    # channels = [1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500]
+    # quad.send_rc(channels)
+    # Tests to run
+        # The Pixhawk only has six RC channels, but MAVLink documentation says
+        #   MAVLink uses eight. Wehich should we use?
+        # Can we control the gimbal this way like we did in roscopter?
+        # Do we need to be in AUTO mode to control the gimbal?
+        # Can we command the quadcopter with RC commands?
+        # If we control the quadcopter with RC commands, are they done in LOITER
+        #   mode or some other mode?
+
+    ###### LAUNCH TEST ######
+    # lat0 = 42.292829
+    # lon0 = -71.263084
+    # quad.launch(lat0, lon0)
+    # Tests to run:
+        # If we uncomment out the current_latitude calls above, do they work?
+
+    ###### WAYPOINT TEST ######
+    # Check the position with this: http://www.gps-coordinates.net/
+    # This waypoint should be right in front of EH, center of the great lawn
+    # lat1 = 42.2924
+    # lon1 = -71.2627
+    # annotated_timer(30)
+    # quad.goto(lat1, lon1, True)
+    # Tests to run:
+        #   what happens if we don't do autocontinue?
+        #   what happens if we set multiple waypoints and then set current wp to
+        #       various things? Could we repeat waypoints?
+        #   What happens if we change the frame? Go here for more options:
+        #       https://github.com/mavlink/mavros/blob/master/mavros/msg/Waypoint.msg
+        #       THIS COULD BE SUPER IMPORTANT FOR DOING FIDUCIALS - COULD WE DO
+        #       A LOCAL FRAME?
+        #   Does the service call return right away, or does it return on completion?
+
+    ###### LAND TEST ######
+    # annotated_timer(30)
+    # quad.land(lat, lon)
+    # Tests to run:
+        # After running this, do we have RC control?
 
     rospy.spin()
