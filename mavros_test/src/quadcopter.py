@@ -10,9 +10,8 @@ from mavros.srv import *
 
 class Quadcopter(object):
     def __init__(self):
-        super(Quadcopter, self).__init__()
         self.SUBSCRIBE_TIMEOUT = 2.0
-
+ 
         # Subscribe to necessary topics
         self.latest_longitude = -1.0
         self.latest_latitude = -1.0
@@ -37,9 +36,11 @@ class Quadcopter(object):
         # Create necessary service proxies
         self.launcher = subscribe_service('/mavros/cmd/takeoff', CommandTOL)
         # TODO: WaypointList isn't working
-        # self.goto_wp = subscribe_service('/mavros/mission/push', WaypointList)
+        rospy.loginfo("Waypoint list is " + str(WaypointList))
+        import pdb
+        pdb.set_trace()
+        self.goto_wp = subscribe_service('/mavros/mission/push', WaypointList)
         self.lander = subscribe_service('/mavros/cmd/land', CommandTOL)
-
 
     def send_rc(self, channels):
         header = Header(seq=1, stamp=rospy.Time.now(), frame_id='')
@@ -125,7 +126,7 @@ def annotated_timer(wait_time = 10.0):
 
 def subscribe_service(name, datatype):
     rospy.loginfo('Waiting for service %s...', name)
-    rospy.wait_for_service(name)
+    # rospy.wait_for_service(name)
     rospy.loginfo('\tSuccesfully found service %s', name)
     return rospy.ServiceProxy(name, datatype)
 
@@ -142,12 +143,15 @@ def evaluate_service(result, success):
 if __name__ == '__main__':
     rospy.init_node('Quadcopter')
     rospy.sleep(1.0)
-
     quad = Quadcopter()
+    quad.goto
 
     ###### RC TEST ######
     channels = [1480, 1500, 1500, 1500, 1430, 1300, 990, 1500]
     quad.send_rc(channels)
+
+    rospy.spin()
+
     # Tests to run
         # The Pixhawk only has six RC channels, but MAVLink documentation says
         #   MAVLink uses eight. Wehich should we use?
@@ -187,4 +191,3 @@ if __name__ == '__main__':
     # Tests to run:
         # After running this, do we have RC control?
 
-    rospy.spin()
