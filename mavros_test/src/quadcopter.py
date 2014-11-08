@@ -7,7 +7,6 @@ from geometry_msgs.msg import TwistStamped
 from mavros.msg import *
 from mavros.srv import *
 
-
 class Quadcopter(object):
     def __init__(self):
         self.SUBSCRIBE_TIMEOUT = 2.0
@@ -39,7 +38,7 @@ class Quadcopter(object):
         rospy.loginfo("Waypoint list is " + str(WaypointList))
         import pdb
         pdb.set_trace()
-        self.goto_wp = subscribe_service('/mavros/mission/push', WaypointList)
+        # self.goto_wp = subscribe_service('/mavros/mission/push', WaypointList)
         self.lander = subscribe_service('/mavros/cmd/land', CommandTOL)
 
     def send_rc(self, channels):
@@ -47,8 +46,9 @@ class Quadcopter(object):
         rssi = 0
         rospy.loginfo('Trying to send RC signal!')
 
+        channel_msg = OverrideRCIn(channels=channels)
         try:
-            self.rc_override_pub.publish(channels)
+            self.rc_override_pub.publish(channel_msg.channels)
         except rospy.ServiceException, e:
             return False
             rospy.logwarn('Error encountered: %s', str(e))
@@ -144,10 +144,10 @@ if __name__ == '__main__':
     rospy.init_node('Quadcopter')
     rospy.sleep(1.0)
     quad = Quadcopter()
-    quad.goto
+    rospy.sleep(1.0)
 
     ###### RC TEST ######
-    channels = [1480, 1500, 1500, 1500, 1430, 1300, 990, 1500]
+    channels = [1480, 1500, 1500, 1500, 1430, 1530, 1530, 1500]
     quad.send_rc(channels)
 
     rospy.spin()
@@ -187,7 +187,6 @@ if __name__ == '__main__':
 
     ###### LAND TEST ######
     # annotated_timer(30)
-    # quad.land(lat, lon)
+    # quad.land(lat0, lon0)
     # Tests to run:
         # After running this, do we have RC control?
-
