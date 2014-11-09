@@ -28,6 +28,9 @@ class QuadcopterBrain(object):
         self.waypoint_service = rospy.ServiceProxy(
             'waypoint', roscopter.srv.SendWaypoint
         )
+        self.waypoint_list_service = rospy.ServiceProxy(
+            'waypoint_list', roscopter.srv.SendWaypointList
+        )
         self.trigger_auto_service = rospy.ServiceProxy(
             'trigger_auto', Empty
         )
@@ -49,9 +52,11 @@ class QuadcopterBrain(object):
         self.trigger_auto_service()
         self.adjust_throttle_service()
         time.sleep(15)
-        for waypoint in waypoints:
+        if len(waypoints) == 1:
             self.waypoint_service(waypoint)
-            print('Sent waypoint')
+            time.sleep(15)
+        else:
+            self.waypoint_list_service(waypoints)
             time.sleep(15)
         print('Landing')
         self.command_service(roscopter.srv.APMCommandRequest.CMD_LAND)
@@ -67,7 +72,7 @@ def build_waypoint(data):
     latitude = data['latitude']
     longitude = data['longitude']
     altitude = data.get('altitude', 8)
-    hold_time = data.get('hold_time', 3.0)
+    hold_time = data.get('hold_time', 15.0)
 
     waypoint = roscopter.msg.Waypoint()
     waypoint.latitude = gps_to_mavlink(latitude)
