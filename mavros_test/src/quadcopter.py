@@ -34,11 +34,12 @@ class Quadcopter(object):
 
         # Create necessary service proxies
         self.launcher = subscribe_service('/mavros/cmd/takeoff', CommandTOL)
+        self.arm = subscribe_service('/mavros/cmd/arming', CommandBool)
         # TODO: WaypointList isn't working
         rospy.loginfo("Waypoint list is " + str(WaypointList))
         import pdb
         pdb.set_trace()
-        # self.goto_wp = subscribe_service('/mavros/mission/push', WaypointList)
+        self.goto_wp = subscribe_service('/mavros/mission/push', WaypointPush)
         self.lander = subscribe_service('/mavros/cmd/land', CommandTOL)
 
     def send_rc(self, channels):
@@ -61,7 +62,7 @@ class Quadcopter(object):
         # current_latitude = self.latest_latitude
         try:
             res = self.launcher(min_pitch, yaw, latitude, longitude, altitude)
-            return evaluate_service(res)
+            return res.success
         except rospy.ServiceException, e:
             rospy.logwarn('Error encountered: %s', str(e))
             return False
@@ -71,12 +72,12 @@ class Quadcopter(object):
              frame = Waypoint.FRAME_GLOBAL, cmd = Waypoint.NAV_WAYPOINT):
         wp = Waypoint(frame = frame, command = cmd,
                       is_current = is_current, autocontinue = autocontinue,
-                      x_lat = 71.44, y_long = -41.22, z_alt = 4)
+                      x_lat = latitude, y_long = longitude, z_alt = 4)
         # TODO: Figure out  - should we be pushing individual waypoints in a
         #   list? Should we be doing individual waypoints?
         try:
-            res = self.goto_wp([wp])
-            return evaluate_service(res)
+            res = self.goto_wp(WaypointPushRequest([wp]))
+            return res.success
         except rospy.ServiceException, e:
             rospy.logwarn('Error encountered: %s', str(e))
             return False
@@ -89,7 +90,7 @@ class Quadcopter(object):
         # current_latitude = self.latest_latitude
         try:
             res = self.lander(min_pitch, yaw, latitude, longitude, altitude)
-            return evaluate_service(res)
+            return res.success
         except rospy.ServiceException, e:
             rospy.logwarn('Error encountered: %s', str(e))
             return False
@@ -130,15 +131,6 @@ def subscribe_service(name, datatype):
     rospy.loginfo('\tSuccesfully found service %s', name)
     return rospy.ServiceProxy(name, datatype)
 
-def evaluate_service(result, success):
-        print 'res: ', result
-        if str(result) == success:
-            rospy.loginfo('Successfully ran service %s', self.service.name)
-            return True
-        else:
-            rospy.loginfo('Error with service %s', self.service.name)
-            return False
-
 
 if __name__ == '__main__':
     rospy.init_node('Quadcopter')
@@ -150,7 +142,7 @@ if __name__ == '__main__':
     channels = [1480, 1500, 1500, 1500, 1430, 1530, 1530, 1500]
     quad.send_rc(channels)
 
-    rospy.spin()
+    #rospy.spin()
 
     # Tests to run
         # The Pixhawk only has six RC channels, but MAVLink documentation says
@@ -161,20 +153,24 @@ if __name__ == '__main__':
         # If we control the quadcopter with RC commands, are they done in LOITER
         #   mode or some other mode?
 
+    res = quad.arm(True)
+    print(res)
+    annotated_timer(5)
+
     ###### LAUNCH TEST ######
-    # lat0 = 42.292829
-    # lon0 = -71.263084
-    # quad.launch(lat0, lon0)
+    lat0 = 42.292829
+    lon0 = -71.263084
+    quad.launch(lat0, lon0)
     # Tests to run:
         # If we uncomment out the current_latitude calls above, do they work?
 
     ###### WAYPOINT TEST ######
     # Check the position with this: http://www.gps-coordinates.net/
     # This waypoint should be right in front of EH, center of the great lawn
-    # lat1 = 42.2924
-    # lon1 = -71.2627
-    # annotated_timer(30)
-    # quad.goto(lat1, lon1, True)
+    lat1 = 42.2924
+    lon1 = -71.2627
+    annotated_timer(5)
+    quad.goto(lat1, lon1, True)
     # Tests to run:
         #   what happens if we don't do autocontinue?
         #   what happens if we set multiple waypoints and then set current wp to
@@ -187,6 +183,9 @@ if __name__ == '__main__':
 
     ###### LAND TEST ######
     # annotated_timer(30)
-    # quad.land(lat0, lon0)
+    quad.land(lat0, lon0)
+    quad.arm(False)
     # Tests to run:
         # After running this, do we have RC control?
+
+    rospy.spin()
