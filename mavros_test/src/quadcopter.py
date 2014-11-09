@@ -37,8 +37,6 @@ class Quadcopter(object):
         self.arm = subscribe_service('/mavros/cmd/arming', CommandBool)
         # TODO: WaypointList isn't working
         rospy.loginfo("Waypoint list is " + str(WaypointList))
-        import pdb
-        pdb.set_trace()
         self.goto_wp = subscribe_service('/mavros/mission/push', WaypointPush)
         self.lander = subscribe_service('/mavros/cmd/land', CommandTOL)
 
@@ -55,11 +53,10 @@ class Quadcopter(object):
             rospy.logwarn('Error encountered: %s', str(e))
         rospy.loginfo('Ran send_rc')
 
-    def launch(self, latitude, longitude, min_pitch = 0, yaw = 0, altitude = 4):
-        # Uncomment this after testing with hand_entered points and confirming
-        # that latest_latitude/longitude is consistently right
-        # current_longitude = self.latest_longitude
-        # current_latitude = self.latest_latitude
+    def launch(self, min_pitch = 1.0, yaw = 0.0, altitude = 4.0):
+        longitude = self.latest_longitude
+        latitude = self.latest_latitude
+        print latitude, longitude
         try:
             res = self.launcher(min_pitch, yaw, latitude, longitude, altitude)
             return res.success
@@ -83,11 +80,9 @@ class Quadcopter(object):
             return False
         rospy.loginfo('Ran goto')
 
-    def land(self, latitude, longitude, min_pitch = 0, yaw = 0, altitude = 4):
-        # Uncomment this after testing with hand_entered points and confirming
-        # that latest_latitude/longitude is consistently right
-        # current_longitude = self.latest_longitude
-        # current_latitude = self.latest_latitude
+    def land(self, min_pitch = 0, yaw = 0, altitude = 4):
+        longitude = self.latest_longitude
+        latitude = self.latest_latitude
         try:
             res = self.lander(min_pitch, yaw, latitude, longitude, altitude)
             return res.success
@@ -97,8 +92,8 @@ class Quadcopter(object):
         rospy.loginfo('Ran land')
 
     def gps_callback(self, msg):
-        rospy.loginfo(rospy.get_caller_id() + 'latitude: %f\tlongitude: %f',
-                      msg.latitude, msg.longitude)
+        # rospy.loginfo(rospy.get_caller_id() + 'latitude: %f\tlongitude: %f',
+        #               msg.latitude, msg.longitude)
         self.latest_longitude = msg.longitude
         self.latest_latitude  = msg.latitude
 
@@ -119,8 +114,8 @@ def annotated_timer(wait_time = 10.0):
     rospy.loginfo('Waiting for 0.0/%.1f seconds', wait_time)
     while not rospy.is_shutdown() and timer < wait_time:
         rospy.sleep(sleep_unit)
-        rospy.loginfo('Waiting for %.1f/%.1f seconds', timer, wait_time)
         timer += sleep_unit
+        rospy.loginfo('Waiting for %.1f/%.1f seconds', timer, wait_time)
     rospy.loginfo("Done waiting! Do a thing!")
     rospy.sleep(0.1)
     return
@@ -145,8 +140,6 @@ if __name__ == '__main__':
     #rospy.spin()
 
     # Tests to run
-        # The Pixhawk only has six RC channels, but MAVLink documentation says
-        #   MAVLink uses eight. Wehich should we use?
         # Can we control the gimbal this way like we did in roscopter?
         # Do we need to be in AUTO mode to control the gimbal?
         # Can we command the quadcopter with RC commands?
@@ -158,9 +151,7 @@ if __name__ == '__main__':
     annotated_timer(5)
 
     ###### LAUNCH TEST ######
-    lat0 = 42.292829
-    lon0 = -71.263084
-    quad.launch(lat0, lon0)
+    quad.launch()
     # Tests to run:
         # If we uncomment out the current_latitude calls above, do they work?
 
@@ -182,9 +173,8 @@ if __name__ == '__main__':
         #   Does the service call return right away, or does it return on completion?
 
     ###### LAND TEST ######
-    # annotated_timer(30)
-    quad.land(lat0, lon0)
-    quad.arm(False)
+    annotated_timer(30)
+    quad.land()
     # Tests to run:
         # After running this, do we have RC control?
 
