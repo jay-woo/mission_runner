@@ -51,18 +51,18 @@ class Quadcopter(object):
             rospy.logwarn('Error encountered in send_rc: %s', str(e))
         rospy.loginfo('Ran send_rc')
 
-    def launch(self, min_pitch = 0.0, yaw = 0.0, altitude = 4.0):
-        print latitude, longitude
+    def launch(self, min_pitch = 0.0, yaw = 0.0, altitude = 5.0):
         try:
             res = self.launcher(min_pitch, yaw, self.latest_longitude,
                                 self.latest_latitude, altitude)
+            print res
             return res.success
         except rospy.ServiceException, e:
             rospy.logwarn('Error encountered in launch: %s', str(e))
             return False
         rospy.loginfo('Ran launch')
 
-    def goto(self, latitude, longitude, altitude = 4.0, is_current = False,
+    def goto(self, latitude, longitude, altitude = 5.0, is_current = False,
              autocontinue = True, frame = Waypoint.FRAME_GLOBAL,
              cmd = Waypoint.NAV_WAYPOINT):
         wp = Waypoint(frame = frame, command = cmd,
@@ -80,6 +80,7 @@ class Quadcopter(object):
         try:
             res = self.lander(min_pitch, yaw, self.latest_longitude,
                               self.latest_latitude, altitude)
+            print res
             return res.success
         except rospy.ServiceException, e:
             rospy.logwarn('Error encountered in land: %s', str(e))
@@ -139,13 +140,13 @@ if __name__ == '__main__':
 
     ###### ARM TEST ######
     # TODO: Arming isnot 
-    if quad.arm(True):
-        rospy.loginfo("Ran arm successfully!")
-    else:
-        rospy.logwarn("Failed to arm")    
+    # if quad.arm(True):
+    #     rospy.loginfo("Ran arm successfully!")
+    # else:
+    #     rospy.logwarn("Failed to arm")    
     # annotated_timer(15)
 
-    ###### LAUNCH TEST ######
+    ##### LAUNCH TEST ######
     # if quad.launch():
     #     rospy.loginfo("Ran launch successfully!")
     # else:
@@ -156,11 +157,11 @@ if __name__ == '__main__':
     ###### WAYPOINT TEST ######
     # Check the position with this: http://www.gps-coordinates.net/
     # This waypoint should be right in front of EH, center of the great lawn
-    lat1 = 42.2917443
-    lon1 = -71.2626758
+    lat1 = 42.2935566
+    lon1 = -71.2652217
     # annotated_timer(15)
     rospy.loginfo("Sending test waypoints...")
-    if quad.goto(lat1, lon1, True):
+    if quad.goto(lat1, lon1, is_current=True):
         rospy.loginfo("Ran goto successfully!")
     else:
         rospy.logwarn("Failed to run goto")
@@ -175,11 +176,11 @@ if __name__ == '__main__':
         #   Does the service call return right away, or does it return on completion?
 
     ###### LAND TEST ######
-    annotated_timer(30)
-    if quad.land():
-        rospy.loginfo("Ran land successfully!")
-    else:
-        rospy.logwarn("Failed to land")
+    # annotated_timer(30)
+    # if quad.land():
+    #     rospy.loginfo("Ran land successfully!")
+    # else:
+    #     rospy.logwarn("Failed to land")
     # Tests to run:
         # After running this, do we have RC control?
 
