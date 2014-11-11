@@ -159,6 +159,7 @@ if __name__ == '__main__':
     lat1 = 42.2917443
     lon1 = -71.2626758
     # annotated_timer(15)
+    rospy.loginfo("Sending test waypoints...")
     if quad.goto(lat1, lon1, True):
         rospy.loginfo("Ran goto successfully!")
     else:
