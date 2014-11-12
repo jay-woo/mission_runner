@@ -42,7 +42,10 @@ class QuadcopterBrain(object):
         # )
 
     def fly_path(self, waypoint_data):
-        waypoints = [build_waypoint(datum) for datum in waypoint_data]
+        waypoints = roscopter.msg.WaypointList()
+        waypoints.waypoints = [
+            build_waypoint(datum) for datum in waypoint_data
+        ]
 
         # Execute flight plan
         self.command_service(roscopter.srv.APMCommandRequest.CMD_ARM)
@@ -51,12 +54,13 @@ class QuadcopterBrain(object):
         print('Launched')
         self.trigger_auto_service()
         self.adjust_throttle_service()
-        time.sleep(15)
-        if len(waypoints) == 1:
-            self.waypoint_service(waypoint)
+        if len(waypoints.waypoints) == 1:
+            self.waypoint_service(waypoints.waypoints[0])
             time.sleep(15)
         else:
+            print "Ready to send"
             self.waypoint_list_service(waypoints)
+            print "Sent waypoints"
             time.sleep(15)
         print('Landing')
         self.command_service(roscopter.srv.APMCommandRequest.CMD_LAND)
@@ -94,6 +98,8 @@ if __name__ == '__main__':
     #rospy.init_node("quadcopter_brain")
     carl = QuadcopterBrain()
     carl.fly_path([
-        {'latitude': 42.2927200, 'longitude': -71.2631700},
-        {'latitude': 42.2926600, 'longitude': -71.2630900}
+        {'latitude': 42.2917443, 'longitude': -71.2626758},
+        {'latitude': 42.2915593, 'longitude': -71.2625504}
+        # {'latitude': 42.2916597, 'longitude': -71.2622852},
+        # {'latitude': 42.2918761, 'longitude': -71.262421}
     ])
