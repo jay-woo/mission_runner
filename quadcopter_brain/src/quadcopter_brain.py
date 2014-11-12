@@ -59,7 +59,9 @@ class QuadcopterBrain(object):
             time.sleep(15)
         else:
             print "Ready to send"
-            self.waypoint_list_service(waypoints)
+            send_list = roscopter.srv.SendWaypointListRequest(waypoints.waypoints)
+            print send_list
+            self.waypoint_list_service(send_list)
             print "Sent waypoints"
             time.sleep(15)
         print('Landing')
@@ -75,7 +77,7 @@ class QuadcopterBrain(object):
 def build_waypoint(data):
     latitude = data['latitude']
     longitude = data['longitude']
-    altitude = data.get('altitude', 8)
+    altitude = data.get('altitude', 8.0)
     hold_time = data.get('hold_time', 15.0)
 
     waypoint = roscopter.msg.Waypoint()
