@@ -20,7 +20,7 @@ boxplot = boxplot_axes.boxplot(corrected_latencies, showmeans=True)
 boxplot_axes.set_ylim(0.32, 0.44)
 boxplot_axes.set_title('Boxplot of Data')
 boxplot_axes.set_ylabel('Latency (seconds)')
-boxplot_axes.set_xlabel('275 meters at 480p')
+boxplot_axes.set_xlabel('275 meters at 1080p and 30fps')
 boxplot_axes.tick_params(
 	axis='x', which='both', bottom='off', top='off', labelbottom='off'
 )
@@ -31,7 +31,7 @@ scatterplot = scatter_axes.scatter(jittered_x_coordinates, corrected_latencies)
 scatter_axes.set_xlim(-0.2, 0.2)
 scatter_axes.set_ylim(0.32, 0.44)
 scatter_axes.set_title('Raw Data (jittered on x axis)')
-scatter_axes.set_xlabel('275 meters at 480p')
+scatter_axes.set_xlabel('275 meters at 1080p and 30fps')
 scatter_axes.tick_params(
 	axis='x', which='both', bottom='off', top='off', labelbottom='off'
 )
