@@ -42,43 +42,33 @@ class QuadcopterBrain(object):
 
     def send_waypoints(self, waypoints):
         successfully_sent_waypoints = False
-        # request = roscopter.srv.SendWaypointListRequest(waypoints.waypoints)
         request = roscopter.srv.SendWaypointListRequest(waypoints)
         tries = 0
         while not successfully_sent_waypoints and tries < 5:
-            # res = self.waypoint_service(waypoint)
             res = self.waypoint_list_service(request)
             tries += 1
             successfully_sent_waypoint = res.result
             if successfully_sent_waypoint:
-                # print('Sent waypoint %d, %d' % (waypoint.latitude,
-                #                                 waypoint.longitude))
-                print "Sent waypoints!"
+                print "Sent waypoints!\n%s" % str(request)
                 time.sleep(15)
             else:
-                # print("Failed to send waypoint %d, %d" % (waypoint.latitude,
-                #                                           waypoint.longitude))
-                print "Failed to send waypoint!"
+                print "Failed to send waypoints\n%s" % str(request)
                 time.sleep(0.1)
-                if tries == 4:
+                if tries == 5:
                     print("Tried 5 times and giving up")
                 else:
-                    print("Trying again. Tries: %d" % (tries+1))
+                    print("Trying again. Tries: %d" % tries)
 
     def fly_path(self, waypoint_data):
-        # waypoints = roscopter.msg.WaypointList()
-        # waypoints.waypoints = [build_waypoint(datum) for datum in waypoint_data]
         waypoints = [build_waypoint(datum) for datum in waypoint_data]
         # Execute flight plan
-        # self.command_service(roscopter.srv.APMCommandRequest.CMD_ARM)
-        # print('Armed')
-        # self.command_service(roscopter.srv.APMCommandRequest.CMD_LAUNCH)
-        # print('Launched')
-        # time.sleep(5)
-        # self.trigger_auto_service()
-        # self.adjust_throttle_service()
-        # for waypoint in waypoints:
-        #     self.send_waypoint(waypoint)
+        self.command_service(roscopter.srv.APMCommandRequest.CMD_ARM)
+        print('Armed')
+        self.command_service(roscopter.srv.APMCommandRequest.CMD_LAUNCH)
+        print('Launched')
+        time.sleep(5)
+        self.trigger_auto_service()
+        self.adjust_throttle_service()
         self.send_waypoints(waypoints)
         self.command_service(roscopter.srv.APMCommandRequest.CMD_LAND)
         print('Landing')
