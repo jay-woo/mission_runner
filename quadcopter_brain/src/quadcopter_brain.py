@@ -15,7 +15,7 @@ from sensor_msgs.msg import NavSatFix, NavSatStatus, Imu
 class QuadcopterBrain(object):
     '''
     High-level quadcopter controller.
-    '''
+2    '''
     def __init__(self):
         rospy.Subscriber("filtered_pos",
                          roscopter.msg.FilteredPosition,
@@ -58,7 +58,7 @@ class QuadcopterBrain(object):
         self.command_service(roscopter.srv.APMCommandRequest.CMD_ARM)
         print('Armed')
         self.command_service(roscopter.srv.APMCommandRequest.CMD_LAUNCH)
-        print('Launched')
+        print('Launched (5s)')
         time.sleep(5)
         self.trigger_auto_service()
         self.adjust_throttle_service()
@@ -109,13 +109,14 @@ def open_waypoint_file(filename):
 
 
 if __name__ == '__main__':
-    #rospy.init_node("quadcopter_brain")
+    rospy.init_node("quadcopter_brain")
+    rospy.loginfo("Starting code")
     carl = QuadcopterBrain()
-    rospy.loginfo("Check the number of waypoints before CLEAR")
+    rospy.loginfo("Check the number of waypoints before CLEAR (15s)")
     rospy.sleep(15)
     rospy.loginfo("Continuing to CLEAR")
     carl.clear_waypoints_service()
-    rospy.loginfo("Check the number of waypoints")
+    rospy.loginfo("Check the number of waypoints (15s)")
     rospy.sleep(15)
     rospy.loginfo("Continuing")
     great_lawn_waypoints = open_waypoint_file(
