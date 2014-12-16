@@ -111,7 +111,13 @@ def open_waypoint_file(filename):
 if __name__ == '__main__':
     #rospy.init_node("quadcopter_brain")
     carl = QuadcopterBrain()
+    rospy.loginfo("Check the number of waypoints before CLEAR")
+    rospy.sleep(15)
+    rospy.loginfo("Continuing to CLEAR")
     carl.clear_waypoints_service()
+    rospy.loginfo("Check the number of waypoints")
+    rospy.sleep(15)
+    rospy.loginfo("Continuing")
     great_lawn_waypoints = open_waypoint_file(
         "waypoint_data/great_lawn_waypoints.json")
     carl.fly_path([great_lawn_waypoints['A'], great_lawn_waypoints['B'],
