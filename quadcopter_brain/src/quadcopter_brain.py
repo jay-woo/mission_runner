@@ -45,18 +45,18 @@ class QuadcopterBrain(object):
         successfully_sent_waypoints = False
         request = roscopter.srv.SendWaypointListRequest(waypoints)
         tries = 0
-        while not successfully_sent_waypoints and tries < 5:
+        while not successfully_sent_waypoints and tries < 10:
             res = self.waypoint_list_service(request)
             tries += 1
             successfully_sent_waypoint = res.result
             if successfully_sent_waypoint:
                 print "Sent waypoints!\n%s" % str(request)
-                time.sleep(15)
+                time.sleep(30)
             else:
                 print "Failed to send waypoints\n%s" % str(request)
                 time.sleep(0.1)
                 if tries == 5:
-                    print("Tried 5 times and giving up")
+                    print("Tried 10 times and giving up")
                 else:
                     print("Trying again. Tries: %d" % tries)
 
@@ -120,7 +120,14 @@ if __name__ == '__main__':
     #rospy.init_node("quadcopter_brain")
     carl = QuadcopterBrain()
     carl.clear_waypoints_service()
-    great_lawn_waypoints = open_waypoint_file(
-        "waypoint_data/great_lawn_waypoints.json")
-    carl.fly_path([great_lawn_waypoints['A'], great_lawn_waypoints['B'],
-                   great_lawn_waypoints['C']])
+    rospy.sleep(3)
+    behind_LPB_waypoints = open_waypoint_file(
+        "waypoint_data/behind_LPB_waypoints.json")
+    carl.fly_path([behind_LPB_waypoints['test2'],
+                   behind_LPB_waypoints['test1'],
+                   behind_LPB_waypoints['test2']])
+    # rospy.spin()
+    # great_lawn_waypoints = open_waypoint_file(
+    #     "waypoint_data/great_lawn_waypoints.json")
+    # carl.fly_path([great_lawn_waypoints['A'], great_lawn_waypoints['B'],
+    #                great_lawn_waypoints['C']])
