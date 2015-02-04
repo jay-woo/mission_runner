@@ -31,8 +31,10 @@ class QuadcopterBrain(object):
             'trigger_auto', Empty)
         self.adjust_throttle_service = rospy.ServiceProxy(
             'adjust_throttle', Empty)
+        rospy.Subscriber("/filtered_pos", roscopter.msg.FilteredPosition,
+                         self.position_callback)
 
-    def go_to_waypoint(self, waypoint):
+    def send_waypoint(self, waypoint):
         successfully_sent_waypoint = False
         tries = 0
 
@@ -53,24 +55,24 @@ class QuadcopterBrain(object):
                 else:
                     print("Retrying. Tries: %d" % (tries))
 
-    def check_reached_waypoint(self, waypoint):
+    def check_reached_waypoint(self, waypoint, max_wait_time=30):
         wait_time = 0
-        rospy.Subscriber("/filtered_pos", roscopter.msg.FilteredPosition,
-                         self.position_callback)
-        while not self.has_reached_waypoint(waypoint) and wait_time < 30:
+        while not self.has_reached_waypoint(waypoint) and \
+                wait_time < max_wait_time:
             time.sleep(5)
             wait_time += 5
             print "--> Traveling to waypoint for %d seconds" % (wait_time)
             print "--> Current position is %d, %d" % (self.current_lat,
                                                       self.current_long)
-        if wait_time < 50: # successfully reached
+        if wait_time < max_wait_time: # successfully reached
             time.sleep(5) # stay at waypoint for a few seconds
             return "Reached waypoint"
         else:
             return "Failed to reach waypoint" 
 
-    def has_reached_waypoint(self, waypoint):
-        error_margin = 3  # in meters
+    def has_reached_waypoint(self, waypoint, error_margin=3):
+        """ waypoint in lat/long
+            error_margin in m """
         try:
             current_pt = utm.fromLatLong(self.current_lat, self.current_long)
             current_x = current_pt.easting
@@ -102,7 +104,7 @@ class QuadcopterBrain(object):
         self.trigger_auto_service()
         self.adjust_throttle_service()
         for waypoint in waypoints:
-            self.go_to_waypoint(waypoint)
+            self.send_waypoint(waypoint)
         self.command_service(roscopter.srv.APMCommandRequest.CMD_LAND)
         print('Landing')
 
