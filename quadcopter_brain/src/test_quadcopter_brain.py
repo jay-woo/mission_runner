@@ -27,5 +27,5 @@ class TestMavlinkConversions(unittest.TestCase):
 if __name__ == '__main__':
     PKG = 'test_quadcopter_brain'
     rostest.rosrun(PKG, 'test_quadcopter_brain', TestQuadcopterBrain)
-    # rostest.rosrun(PKG, 'test_waypoint', TestWaypoint)
-    # rostest.rosrun(PKG, 'test_mavlink_conversions', TestMavlinkConversions)
+    #rostest.rosrun(PKG, 'test_waypoint', TestWaypoint)
+    #rostest.rosrun(PKG, 'test_mavlink_conversions', TestMavlinkConversions)
