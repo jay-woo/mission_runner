@@ -10,11 +10,11 @@ SnotBot is an autonomous drone to be used by marine scientists during research v
 
 Launching the Repo:
 In order to run this repo, you will need to download the following packages
-	- ROS from Willow Garage for the distribution of Ubuntu you are running
-	- A workspace for ROS (like catkin)
-	- Open CV
-	- Roscopter from https://github.com/epsilonorion/roscopter (tutorial here:https://github.com/epsilonorion/roscopter/wiki)
-	- Joystick drivers for your ROS/Ubuntu distribution (these links may be a useful resource: http://wiki.ros.org/joy/Tutorials/ConfiguringALinuxJoystick and http://linuxcommand.org/lts0070.php)
+		- ROS from Willow Garage for the distribution of Ubuntu you are running
+		- A workspace for ROS (like catkin)
+		- Open CV
+		- Roscopter from https://github.com/epsilonorion/roscopter (tutorial here:https://github.com/epsilonorion/roscopter/wiki)
+		- Joystick drivers for your ROS/Ubuntu distribution (these links may be a useful resource: http://wiki.ros.org/joy/Tutorials/ConfiguringALinuxJoystick and http://linuxcommand.org/lts0070.php)
 
 Testing procedure coming soon!
 
