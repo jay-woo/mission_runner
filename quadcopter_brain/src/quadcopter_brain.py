@@ -8,7 +8,7 @@ import rospkg
 import rospy
 import roscopter
 import roscopter.msg
-import roscopter.srv
+from roscopter.srv import APMCommand
 from std_srvs.srv import *
 from sensor_msgs.msg import NavSatFix, NavSatStatus, Imu
 
@@ -25,13 +25,13 @@ class QuadcopterBrain(object):
         self.clear_waypoints_service = rospy.ServiceProxy(
             'clear_waypoints', Empty)
         self.command_service = rospy.ServiceProxy(
-            'command', roscopter.srv.APMCommand)
-        self.waypoint_service = rospy.ServiceProxy(
-            'waypoint', roscopter.srv.SendWaypoint)
-        self.trigger_auto_service = rospy.ServiceProxy(
-            'trigger_auto', Empty)
-        self.adjust_throttle_service = rospy.ServiceProxy(
-            'adjust_throttle', Empty)
+            'apm/command', APMCommand)
+        #self.waypoint_service = rospy.ServiceProxy(
+        #    'waypoint', roscopter.srv.SendWaypoint)
+        #self.trigger_auto_service = rospy.ServiceProxy(
+        #    'trigger_auto', Empty)
+        #self.adjust_throttle_service = rospy.ServiceProxy(
+        #    'adjust_throttle', Empty)
 
     def send_waypoint(self, waypoint):
         successfully_sent_waypoint = False
@@ -67,6 +67,15 @@ class QuadcopterBrain(object):
             self.send_waypoint(waypoint)
         self.command_service(roscopter.srv.APMCommandRequest.CMD_LAND)
         print('Landing')
+
+    def tester_script(self, waypoint_data):
+        waypoints = [build_waypoint(datum) for datum in waypoint_data]
+        # Execute flight plan
+        self.command_service(3)
+        print('Armed')
+        time.sleep(5)
+        self.command_service(4)
+        print('Disarmed')
 
     def reached_waypoint(self, waypoint):
         pass
@@ -114,7 +123,6 @@ if __name__ == '__main__':
     #rospy.init_node("quadcopter_brain")
     carl = QuadcopterBrain()
     #carl.clear_waypoints_service()
-    great_lawn_waypoints = open_waypoint_file(
-        "waypoint_data/great_lawn_waypoints.json")
-    carl.fly_path([great_lawn_waypoints['V1'], great_lawn_waypoints['V2'],
-                   great_lawn_waypoints['V3']])
+    great_lawn_waypoints = open_waypoint_file("waypoint_data/great_lawn_waypoints.json")
+    carl.tester_script([great_lawn_waypoints['V1'], great_lawn_waypoints['V2'], great_lawn_waypoints['V3']])
+    #carl.fly_path([great_lawn_waypoints['V1'], great_lawn_waypoints['V2'], great_lawn_waypoints['V3']])
