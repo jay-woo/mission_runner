@@ -16,6 +16,6 @@ In order to run this repo, you will need to download the following packages
 		- Roscopter from https://github.com/epsilonorion/roscopter (tutorial here:https://github.com/epsilonorion/roscopter/wiki)
 		- Joystick drivers for your ROS/Ubuntu distribution (these links may be a useful resource: http://wiki.ros.org/joy/Tutorials/ConfiguringALinuxJoystick and http://linuxcommand.org/lts0070.php)
 
-Testing procedure coming soon!
+In order to run the brain structure, launch roscore, launch roscopter, and rosrun quadcopter_brain quadcopter_brain.py.
 
 
