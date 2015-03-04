@@ -26,12 +26,12 @@ class QuadcopterBrain(object):
             'clear_waypoints', Empty)
         self.command_service = rospy.ServiceProxy(
             'apm/command', APMCommand)
-        #self.waypoint_service = rospy.ServiceProxy(
-        #    'waypoint', roscopter.srv.SendWaypoint)
-        #self.trigger_auto_service = rospy.ServiceProxy(
-        #    'trigger_auto', Empty)
-        #self.adjust_throttle_service = rospy.ServiceProxy(
-        #    'adjust_throttle', Empty)
+        self.waypoint_service = rospy.ServiceProxy(
+           'waypoint', roscopter.srv.SendWaypoint)
+        self.trigger_auto_service = rospy.ServiceProxy(
+           'trigger_auto', Empty)
+        self.adjust_throttle_service = rospy.ServiceProxy(
+           'adjust_throttle', Empty)
 
     def send_waypoint(self, waypoint):
         successfully_sent_waypoint = False
@@ -122,7 +122,7 @@ def open_waypoint_file(filename):
 if __name__ == '__main__':
     #rospy.init_node("quadcopter_brain")
     carl = QuadcopterBrain()
-    #carl.clear_waypoints_service()
+    carl.clear_waypoints_service()
     great_lawn_waypoints = open_waypoint_file("waypoint_data/great_lawn_waypoints.json")
     carl.tester_script([great_lawn_waypoints['V1'], great_lawn_waypoints['V2'], great_lawn_waypoints['V3']])
-    #carl.fly_path([great_lawn_waypoints['V1'], great_lawn_waypoints['V2'], great_lawn_waypoints['V3']])
+    carl.fly_path([great_lawn_waypoints['V1'], great_lawn_waypoints['V2'], great_lawn_waypoints['V3']])
