@@ -41,13 +41,12 @@ class Quadcopter(object):
         self._command_service(roscopter.srv.APMCommandRequest.CMD_ARM)
         print('Armed')
 
-    def launch(self, max_num_tries=5):
+    def launch(self, max_num_tries=10):
         print('Sending launch command...')
         successful_launch = False
         tries = 0
         while not successful_launch and tries < max_num_tries:
-            res = self._command_service(
-                roscopter.srv.APMCommandRequest.CMD_LAUNCH)
+            res = self._command_service(1)
             successful_launch = res.result
             tries += 1
             self._print_launch_status(successful_launch, tries, max_num_tries)
