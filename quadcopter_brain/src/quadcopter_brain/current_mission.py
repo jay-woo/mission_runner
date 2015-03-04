@@ -23,6 +23,7 @@ def main():
 
     if outside:
         carl.quadcopter.arm()
+    
     carl.fly_path([great_lawn_waypoints["F"],
                    great_lawn_waypoints["E"],
                    great_lawn_waypoints["G"]])

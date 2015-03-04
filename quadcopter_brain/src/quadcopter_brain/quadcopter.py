@@ -41,12 +41,12 @@ class Quadcopter(object):
         self._command_service(roscopter.srv.APMCommandRequest.CMD_ARM)
         print('Armed')
 
-    def launch(self, max_num_tries=10):
+    def launch(self, max_num_tries=7):
         print('Sending launch command...')
         successful_launch = False
         tries = 0
         while not successful_launch and tries < max_num_tries:
-            res = self._command_service(1)
+            res = self._command_service(roscopter.srv.APMCommandRequest.CMD_LAUNCH)
             successful_launch = res.result
             tries += 1
             self._print_launch_status(successful_launch, tries, max_num_tries)
@@ -93,8 +93,8 @@ class Quadcopter(object):
             TODO: Explain why it is necessary to trigger_auto and
             adjust_throttle - b/c ROSCOPTER is dumb
         '''
-        self._trigger_auto_service()
-        self._adjust_throttle_service()
+        #self._trigger_auto_service()
+        #self._adjust_throttle_service()
 
     def _print_send_waypoint_status(self, waypoint, sent_waypoint,
                                     tries, max_num_tries):
