@@ -100,8 +100,6 @@ class QuadcopterBrain(object):
         except AttributeError:  # if haven't gotten current position data
             return False
 
-<<<<<<< HEAD
-=======
     def find_landing_site(self):
         '''
         Executes a search behavior for the fiducial, return its placement of
@@ -151,4 +149,3 @@ class QuadcopterBrain(object):
                 seen = goal_lat not None
         print("Fiducial found: %s, altitude %f" % (found, alt))
         self.land()
->>>>>>> 84e323e6692591d41fe741cfce8a3b441106704f
