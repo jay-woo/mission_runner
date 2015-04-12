@@ -145,12 +145,7 @@ class QuadcopterBrain(object):
                          'altitude': alt - 2.0}
                 self.go_to_waypoints([waypt], time_to_sleep=8)
                 alt = self.quadcopter.current_rel_alt
-<<<<<<< HEAD
-                seen = goal_lat not None
-        print("Fiducial found: %s, altitude %f" % (found, alt))
-        self.land()
-=======
                 seen = goal_lat is not None
         rospy.loginfo("Fiducial found: %s, altitude %f", found, alt)
         self.land()
->>>>>>> d2f54045bfcd559733cf569fc6d88991f27da555
+
