@@ -92,27 +92,34 @@ def print_position_data(quadcopter):
 
 
 def main():
-    carl = QuadcopterBrain()
+    frizzle = QuadcopterBrain()
 
     # Quadcopter node (carl) must be initialized before get_param will work
     outside = rospy.get_param("Quadcopter/outside", False)
     rospy.loginfo("In outside mode: %s.", outside)
     rospy.loginfo("If incorrect, add _outside:=True to the rosrun call")
 
-    carl.quadcopter.clear_waypoints()
+    frizzle.quadcopter.clear_waypoints()
     rospy.loginfo("Sleeping for 3 seconds...")
     rospy.sleep(3)
 
-    great_lawn_waypoints = WaypointTools.open_waypoint_file(
+    #To change waypoints, change the file shown below
+    mission_waypoints = WaypointTools.open_waypoint_file(
         "great_lawn_waypoints.json")
 
     if outside:
-        carl.quadcopter.arm()
+        frizzle.quadcopter.arm()
     
-    carl.fly_path([great_lawn_waypoints["F"],
-                   great_lawn_waypoints["E"],
-                   great_lawn_waypoints["G"]])
+    #If mission file has all of the points of interest, use:
+    #for point in mission_waypoints:
+    #   mission.append(point)
+    #frizzle.fly_path(mission)
+    frizzle.fly_path([mission_waypoints["F"],
+                   mission_waypoints["E"],
+                   mission_waypoints["G"]])
 
 
 if __name__ == '__main__':
     main()
+    #For debugging, use the following: 
+    #rc_square_dance()
